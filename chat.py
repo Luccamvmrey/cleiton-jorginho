@@ -64,7 +64,8 @@ def check_end_chat(text):
 
 # Consult chatGPT
 def generate_prompt(user_input):
-    message = Message(role="user", content=user_input)
+    query = f"{user_input}, lembre de SEMPRE explicitar se a pergunta é *Geral* ou sobre *Aulas/Eventos*"
+    message = Message(role="user", content=query)
     CHAT_HISTORY.append(message.full_message())
 
     response = client.chat.completions.create(
@@ -104,6 +105,7 @@ def extract_url_from_response(response):
         url = None
 
     modified_response = re.sub(url_pattern, '', response)
+
     return modified_response.strip(), url
 
 
@@ -118,18 +120,20 @@ def query_classes_api(url_params):
     url = f"https://mimir-api.vercel.app{url_params}"
     print(url)
     api_response = None
+    error_response = None
 
     try:
         response = requests.get(url)
         response.raise_for_status()
         api_response = response.json()
     except requests.exceptions.RequestException as e:
+        error_response = "Não encontrei a informação que você pediu. Tente novamente"
         print("Erro na requisição:", e)
     except json.JSONDecodeError as e:
         print("Erro ao decodificar JSON:", e)
         api_response = None
 
-    return api_response
+    return api_response, error_response
 
 
 def get_class_info(classes_response):
@@ -152,19 +156,21 @@ def handle_user_input(user_input):
     response = generate_prompt(user_input)
 
     modified_response, extracted_info = extract_info(response)
-    print(modified_response, extracted_info)
 
     final_response = None
 
     if extracted_info == "Aulas/Eventos":
         modified_response, url = extract_url_from_response(modified_response)
-        print(modified_response, url)
 
         if not has_parameters(url):
             final_response = modified_response
         else:
-            classes_response = query_classes_api(url)
-            final_response = get_class_info(classes_response)
+            classes_response, error = query_classes_api(url)
+
+            if error:
+                final_response = error
+            else:
+                final_response = get_class_info(classes_response)
 
     elif extracted_info == "Geral":
         final_response = modified_response
