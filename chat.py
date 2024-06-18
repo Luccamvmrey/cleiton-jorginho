@@ -136,20 +136,20 @@ def query_classes_api(url_params):
     return api_response, error_response
 
 
-def get_class_info(classes_response):
-    final_message = ""
-    for class_info in classes_response:
-        class_info["dayOfWeek"] = transform_day_of_week(class_info["dayOfWeek"])
-        class_info["group"] = transform_group(class_info["group"])
-
-        response = (f"A aula do professor {class_info['professorName']} será na sala"
-                    f" {class_info['room']['roomNumber']} no {class_info['room']['roomFloor']}º"
-                    f" andar na {class_info['dayOfWeek']} às {class_info['timeIn']}")
-
-        final_message += response + "\n"
-
-    CHAT_HISTORY.append({"role": "assistant", "content": final_message})
-    return final_message
+# def get_class_info(classes_response):
+#     final_message = ""
+#     for class_info in classes_response:
+#         class_info["dayOfWeek"] = transform_day_of_week(class_info["dayOfWeek"])
+#         class_info["group"] = transform_group(class_info["group"])
+#
+#         response = (f"A aula do professor {class_info['professorName']} será na sala"
+#                     f" {class_info['room']['roomNumber']} no {class_info['room']['roomFloor']}º"
+#                     f" andar na {class_info['dayOfWeek']} às {class_info['timeIn']}")
+#
+#         final_message += response + "\n"
+#
+#     CHAT_HISTORY.append({"role": "assistant", "content": final_message})
+#     return final_message
 
 
 def handle_user_input(user_input):
@@ -170,7 +170,20 @@ def handle_user_input(user_input):
             if error:
                 final_response = error
             else:
-                final_response = get_class_info(classes_response)
+                # final_response = get_class_info(classes_response)
+                classes_message = Message(role="system", content=json.dumps(classes_response))
+                CHAT_HISTORY.append(classes_message.full_message())
+
+                answer_message = Message(role="system", content=system_query_answer)
+                CHAT_HISTORY.append(answer_message.full_message())
+
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=CHAT_HISTORY
+                )
+                print("Pensando...")
+
+                final_response = response.choices[0].message.content
 
     elif extracted_info == "Geral":
         final_response = modified_response

@@ -26,3 +26,7 @@ system_query_general = ("Se a pergunta for geral, responda de maneira objetiva e
                         " Você está interessado em conversar mais sobre os temas das perguntas. Por isso,"
                         " sempre pergunte o que mais a pessoa gostaria de saber ou estimule ela a falar"
                         " mais sobre o assunto.")
+
+
+system_query_answer = ("Tendo a pergunta feita anteriormente pelo usuário em seu Contexto, e baseado nos"
+                       " dados que você recebeu da API, no formato de JSON, responda o que o usuário pediu")
