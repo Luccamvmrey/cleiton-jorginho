@@ -29,4 +29,6 @@ system_query_general = ("Se a pergunta for geral, responda de maneira objetiva e
 
 
 system_query_answer = ("Tendo a pergunta feita anteriormente pelo usuário em seu Contexto, e baseado nos"
-                       " dados que você recebeu da API, no formato de JSON, responda o que o usuário pediu")
+                       " dados que você recebeu da API, no formato de JSON, responda o que o usuário pediu."
+                       " Informação importante, os grupos de 0 a 2, correspondem às turmas A, B e C. Não fale"
+                       " o número do grupo e sim a letra correspondente.")
